@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b0b0a;
+  --bg-raised: #131211;
+  --fg: #f4f1ea;
+  --muted: #8c877c;
+  --line: rgba(244, 241, 234, 0.12);
+  --accent: #c9723f;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --font-display: var(--font-big-shoulders);
+  --font-sans: var(--font-plex-sans);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Custom scrollbar, dark & thin */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-raised);
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+}
+
+/* Hide native cursor for fine pointers only; touch keeps default */
+@media (hover: hover) and (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor a,
+  html.has-custom-cursor button {
+    cursor: none;
+  }
+}
+
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-marquee {
+    animation-duration: 90s;
+  }
+}
