@@ -37,23 +37,56 @@ export default function PhotoForm({
   );
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const isEdit = !!initial;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setUploadError(null);
 
     const formData = new FormData(event.currentTarget);
-    const file = formData.get("image") as File | null;
+    const files = formData
+      .getAll("image")
+      .filter((f): f is File => f instanceof File && f.size > 0);
     formData.delete("image");
 
-    if (file && file.size > 0) {
+    if (isEdit) {
+      // Editing replaces the one existing image, if a new file was chosen.
+      if (files[0]) {
+        setUploading(true);
+        try {
+          const result = await uploadToCloudinary(files[0]);
+          formData.set("imageUrl", result.url);
+          formData.set("imagePublicId", result.publicId);
+          formData.set("imageWidth", String(result.width));
+          formData.set("imageHeight", String(result.height));
+        } catch (err) {
+          setUploading(false);
+          setUploadError(err instanceof Error ? err.message : "Upload failed.");
+          return;
+        }
+        setUploading(false);
+      }
+    } else {
+      // Creating: upload every selected file, one photo row per image.
+      if (files.length === 0) {
+        setUploadError("Choose at least one image to upload.");
+        return;
+      }
       setUploading(true);
       try {
-        const result = await uploadToCloudinary(file);
-        formData.set("imageUrl", result.url);
-        formData.set("imagePublicId", result.publicId);
-        formData.set("imageWidth", String(result.width));
-        formData.set("imageHeight", String(result.height));
+        const results = await Promise.all(files.map(uploadToCloudinary));
+        formData.set(
+          "photosJson",
+          JSON.stringify(
+            results.map((r) => ({
+              url: r.url,
+              publicId: r.publicId,
+              width: r.width,
+              height: r.height,
+            }))
+          )
+        );
       } catch (err) {
         setUploading(false);
         setUploadError(err instanceof Error ? err.message : "Upload failed.");
@@ -78,20 +111,28 @@ export default function PhotoForm({
 
       <div>
         <label className="mb-1.5 block font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
-          Image {currentImageUrl && "(leave empty to keep current)"}
+          {isEdit ? "Image (leave empty to keep current)" : "Images"}
         </label>
         <input
           name="image"
           type="file"
           accept="image/*"
+          multiple={!isEdit}
           required={!currentImageUrl}
+          onChange={(e) => setSelectedCount(e.target.files?.length ?? 0)}
           className="w-full font-sans text-sm text-muted file:mr-4 file:rounded-full file:border file:border-line file:bg-transparent file:px-3 file:py-1.5 file:font-sans file:text-[12px] file:uppercase file:tracking-[0.1em] file:text-fg"
         />
+        {!isEdit && selectedCount > 1 && (
+          <p className="mt-1.5 font-sans text-[12px] text-muted">
+            {selectedCount} images selected — each will be published as its
+            own photo.
+          </p>
+        )}
       </div>
 
       <div>
         <label className="mb-1.5 block font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
-          Title
+          Title {!isEdit && selectedCount > 1 && "(used as a base — “Title 1”, “Title 2”, …)"}
         </label>
         <input
           name="title"
@@ -179,7 +220,13 @@ export default function PhotoForm({
         disabled={pending || uploading}
         className="mt-2 self-start rounded-full bg-fg px-5 py-2.5 font-sans text-[13px] uppercase tracking-[0.1em] text-bg transition-transform duration-[160ms] ease-out active:scale-[0.97] disabled:opacity-50"
       >
-        {uploading ? "Uploading image…" : pending ? "Saving…" : submitLabel}
+        {uploading
+          ? selectedCount > 1
+            ? `Uploading ${selectedCount} images…`
+            : "Uploading image…"
+          : pending
+            ? "Saving…"
+            : submitLabel}
       </button>
     </form>
   );

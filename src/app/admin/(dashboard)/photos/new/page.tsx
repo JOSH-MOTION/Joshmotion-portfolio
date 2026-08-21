@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createPhoto } from "@/app/admin/actions";
+import { createPhotos } from "@/app/admin/actions";
 import PhotoForm from "@/components/admin/PhotoForm";
 
 export default async function NewPhotoPage() {
@@ -13,7 +13,7 @@ export default async function NewPhotoPage() {
     <div>
       <h1 className="mb-8 font-display font-extrabold uppercase text-2xl">New photo</h1>
       <PhotoForm
-        action={createPhoto}
+        action={createPhotos}
         categories={categories ?? []}
         submitLabel="Publish"
       />

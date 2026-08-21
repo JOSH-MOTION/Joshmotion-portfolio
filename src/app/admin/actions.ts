@@ -126,40 +126,53 @@ async function deleteCloudinaryAsset(publicId: string) {
   }
 }
 
-export async function createPhoto(_prev: ActionState, formData: FormData): Promise<ActionState> {
+type UploadedImage = { url: string; publicId: string; width: number; height: number };
+
+/** Creates one or more photos at once (the admin form lets you pick several
+ * files in one go). Shared fields (category/location/year/span) apply to
+ * every photo in the batch; when more than one image is uploaded, the title
+ * becomes a numbered base ("Wedding Shoot 1", "Wedding Shoot 2", …) rather
+ * than being reused as-is. */
+export async function createPhotos(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient();
 
-  const imageUrl = String(formData.get("imageUrl") ?? "");
-  if (!imageUrl) return { error: "Choose an image to upload." };
-
-  const title = String(formData.get("title") ?? "").trim();
+  const titleBase = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "");
   const location = String(formData.get("location") ?? "").trim();
   const year = String(formData.get("year") ?? "").trim();
   const span = String(formData.get("span") ?? "");
-  const imagePublicId = String(formData.get("imagePublicId") ?? "");
-  const width = Number(formData.get("imageWidth") ?? 1200);
-  const height = Number(formData.get("imageHeight") ?? 1500);
 
-  if (!title || !category) return { error: "Title and category are required." };
+  if (!titleBase || !category) return { error: "Title and category are required." };
+
+  let images: UploadedImage[];
+  try {
+    images = JSON.parse(String(formData.get("photosJson") ?? "[]"));
+  } catch {
+    return { error: "Something went wrong reading the uploaded images." };
+  }
+  if (!Array.isArray(images) || images.length === 0) {
+    return { error: "Choose at least one image to upload." };
+  }
 
   const { count } = await supabase
     .from("photos")
     .select("id", { count: "exact", head: true });
+  const startOrder = count ?? 0;
 
-  const { error: insertError } = await supabase.from("photos").insert({
-    title,
+  const rows = images.map((img, i) => ({
+    title: images.length > 1 ? `${titleBase} ${i + 1}` : titleBase,
     category,
     location,
     year,
     span,
-    width,
-    height,
-    image_path: imageUrl,
-    image_public_id: imagePublicId,
-    sort_order: count ?? 0,
-  });
+    width: img.width,
+    height: img.height,
+    image_path: img.url,
+    image_public_id: img.publicId,
+    sort_order: startOrder + i,
+  }));
 
+  const { error: insertError } = await supabase.from("photos").insert(rows);
   if (insertError) return { error: insertError.message };
 
   revalidatePath("/");
