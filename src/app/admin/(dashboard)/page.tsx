@@ -29,14 +29,11 @@ export default async function AdminPhotosPage() {
       ) : (
         <div className="flex flex-col divide-y divide-line border-y border-line">
           {photos.map((photo) => {
-            const { data: img } = supabase.storage
-              .from("photos")
-              .getPublicUrl(photo.image_path);
             return (
               <div key={photo.id} className="flex items-center gap-4 py-3">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded bg-bg-raised">
                   <Image
-                    src={img.publicUrl}
+                    src={photo.image_path}
                     alt={photo.title}
                     fill
                     sizes="64px"
@@ -60,7 +57,7 @@ export default async function AdminPhotosPage() {
                 <form
                   action={async () => {
                     "use server";
-                    await deletePhoto(photo.id, photo.image_path);
+                    await deletePhoto(photo.id, photo.image_public_id);
                   }}
                 >
                   <button

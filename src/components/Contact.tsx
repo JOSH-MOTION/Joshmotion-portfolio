@@ -16,7 +16,7 @@ export default function Contact() {
       <div className="mx-auto max-w-7xl">
         <MaskReveal>
           <p className="mb-3 font-sans text-[13px] uppercase tracking-[0.25em] text-muted">
-            03 — Get in touch
+            04 — Get in touch
           </p>
         </MaskReveal>
         <MaskReveal delay={0.08}>

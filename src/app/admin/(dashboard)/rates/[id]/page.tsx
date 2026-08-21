@@ -19,14 +19,12 @@ export default async function EditRateCardPage({
 
   if (!card) notFound();
 
-  const { data: img } = supabase.storage.from("photos").getPublicUrl(card.image_path);
-
   return (
     <div>
       <h1 className="mb-8 font-display font-extrabold uppercase text-2xl">Edit rate card</h1>
       <RateCardForm
         action={updateRateCard.bind(null, id)}
-        currentImageUrl={img.publicUrl}
+        currentImageUrl={card.image_path}
         initial={{
           title: card.title,
           description: card.description,

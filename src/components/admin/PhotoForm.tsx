@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import type { ActionState } from "@/app/admin/actions";
 import type { CategoryOption } from "@/lib/data";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const spanOptions = [
   { value: "", label: "Normal (1 col)" },
@@ -34,9 +35,38 @@ export default function PhotoForm({
     action,
     null
   );
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setUploadError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const file = formData.get("image") as File | null;
+    formData.delete("image");
+
+    if (file && file.size > 0) {
+      setUploading(true);
+      try {
+        const result = await uploadToCloudinary(file);
+        formData.set("imageUrl", result.url);
+        formData.set("imagePublicId", result.publicId);
+        formData.set("imageWidth", String(result.width));
+        formData.set("imageHeight", String(result.height));
+      } catch (err) {
+        setUploading(false);
+        setUploadError(err instanceof Error ? err.message : "Upload failed.");
+        return;
+      }
+      setUploading(false);
+    }
+
+    formAction(formData);
+  }
 
   return (
-    <form action={formAction} className="flex max-w-lg flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex max-w-lg flex-col gap-5">
       {currentImageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -138,16 +168,18 @@ export default function PhotoForm({
         </div>
       </div>
 
-      {state?.error && (
-        <p className="font-sans text-[13px] text-accent">{state.error}</p>
+      {(uploadError || state?.error) && (
+        <p className="font-sans text-[13px] text-accent">
+          {uploadError ?? state?.error}
+        </p>
       )}
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || uploading}
         className="mt-2 self-start rounded-full bg-fg px-5 py-2.5 font-sans text-[13px] uppercase tracking-[0.1em] text-bg transition-transform duration-[160ms] ease-out active:scale-[0.97] disabled:opacity-50"
       >
-        {pending ? "Saving…" : submitLabel}
+        {uploading ? "Uploading image…" : pending ? "Saving…" : submitLabel}
       </button>
     </form>
   );

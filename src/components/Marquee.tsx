@@ -1,6 +1,7 @@
 const ITEMS = [
   "Portraits",
-  "Street",
+  "Weddings",
+  "Corporate",
   "Editorial",
   "Film",
   "Available for commissions",

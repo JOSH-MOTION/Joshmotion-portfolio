@@ -66,7 +66,7 @@ export async function getPhotos(): Promise<GalleryPhoto[]> {
 
   return data.map((row) => ({
     id: row.id,
-    src: supabase.storage.from("photos").getPublicUrl(row.image_path).data.publicUrl,
+    src: row.image_path,
     width: row.width,
     height: row.height,
     category: row.category,
@@ -122,7 +122,7 @@ export async function getRateCards(): Promise<RateCardItem[]> {
     priceAmount: Number(row.price_amount),
     priceCurrency: row.price_currency,
     priceNote: row.price_note,
-    src: supabase.storage.from("photos").getPublicUrl(row.image_path).data.publicUrl,
+    src: row.image_path,
   }));
 }
 

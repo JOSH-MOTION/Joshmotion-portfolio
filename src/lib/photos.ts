@@ -4,7 +4,8 @@ export type Category =
   | "editorial"
   | "film"
   | "baby-family"
-  | "wedding";
+  | "wedding"
+  | "corporate";
 
 export type Photo = {
   id: string;
@@ -114,7 +115,7 @@ export const photos: Photo[] = [
     width: 1400,
     height: 1750,
     category: "film",
-    title: "35mm, Overcast",
+    title: "Overcast, Film",
     location: "Cape Coast, GH",
     year: "2023",
     span: "md:col-span-2 md:row-span-2",
@@ -185,6 +186,17 @@ export const photos: Photo[] = [
     year: "2025",
     span: "md:col-span-2",
   },
+  {
+    id: "15",
+    seed: "joshmotion-15",
+    width: 1600,
+    height: 1067,
+    category: "corporate",
+    title: "The Boardroom",
+    location: "Accra, GH",
+    year: "2025",
+    span: "md:col-span-2",
+  },
 ];
 
 export const categories: { key: Category | "all"; label: string }[] = [
@@ -195,6 +207,7 @@ export const categories: { key: Category | "all"; label: string }[] = [
   { key: "film", label: "Film" },
   { key: "baby-family", label: "Baby & Family" },
   { key: "wedding", label: "Weddings" },
+  { key: "corporate", label: "Corporate" },
 ];
 
 export type RateCard = {

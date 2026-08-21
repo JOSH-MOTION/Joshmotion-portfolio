@@ -5,8 +5,8 @@ import MaskReveal from "@/components/MaskReveal";
 const stats = [
   { label: "Based in", value: "Accra, Ghana" },
   { label: "Shooting since", value: "2019" },
-  { label: "Kit", value: "Modern mirrorless & 35mm film" },
-  { label: "Available for", value: "Editorial, portrait, travel" },
+  { label: "Kit", value: "Modern mirrorless" },
+  { label: "Available for", value: "Editorial, portrait, corporate, travel" },
 ];
 
 export default function About() {
@@ -37,9 +37,9 @@ export default function About() {
           </MaskReveal>
           <RevealOnScroll delay={0.18}>
             <p className="mt-6 max-w-lg font-sans text-[15px] leading-relaxed text-muted">
-              I&apos;m Joshua — a portrait and editorial photographer working
-              between digital and 35mm film. My work leans toward stillness:
-              real light, real rooms, people who forget the camera is there.
+              I&apos;m Joshua — a portrait and editorial photographer. My work
+              leans toward stillness: real light, real rooms, people who
+              forget the camera is there.
               Every set starts with a conversation, not a shot list. I also
               run{" "}
               <a

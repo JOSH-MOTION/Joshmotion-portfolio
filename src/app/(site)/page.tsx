@@ -3,6 +3,7 @@ import Marquee from "@/components/Marquee";
 import WorkTeaser from "@/components/WorkTeaser";
 import Cinematic from "@/components/Cinematic";
 import About from "@/components/About";
+import Values from "@/components/Values";
 import Contact from "@/components/Contact";
 import { getRandomPhotoSample } from "@/lib/data";
 
@@ -18,6 +19,7 @@ export default async function Home() {
       <WorkTeaser photos={photos} />
       <Cinematic />
       <About />
+      <Values />
       <Contact />
     </>
   );

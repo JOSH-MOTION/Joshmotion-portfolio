@@ -18,15 +18,13 @@ export default async function EditPhotoPage({
 
   if (!photo) notFound();
 
-  const { data: img } = supabase.storage.from("photos").getPublicUrl(photo.image_path);
-
   return (
     <div>
       <h1 className="mb-8 font-display font-extrabold uppercase text-2xl">Edit photo</h1>
       <PhotoForm
         action={updatePhoto.bind(null, id)}
         categories={categories ?? []}
-        currentImageUrl={img.publicUrl}
+        currentImageUrl={photo.image_path}
         initial={{
           title: photo.title,
           category: photo.category,

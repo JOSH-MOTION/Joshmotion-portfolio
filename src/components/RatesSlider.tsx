@@ -47,7 +47,7 @@ export default function RatesSlider({ cards }: { cards: RateCardItem[] }) {
             <div className="relative aspect-[4/5] w-full overflow-hidden md:aspect-auto">
               <Image
                 src={card.src}
-                alt={card.title}
+                alt={`${card.title} — Joshmotion photography package`}
                 fill
                 sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"

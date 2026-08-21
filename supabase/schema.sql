@@ -7,6 +7,9 @@ create table if not exists categories (
   sort_order int not null default 0
 );
 
+-- image_path stores the full Cloudinary secure_url (not a Supabase Storage
+-- object path); image_public_id is Cloudinary's asset id, needed to delete
+-- the image from Cloudinary when the row is deleted.
 create table if not exists photos (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -14,6 +17,7 @@ create table if not exists photos (
   location text not null default '',
   year text not null default '',
   image_path text not null,
+  image_public_id text,
   width int not null default 1200,
   height int not null default 1500,
   span text not null default '',
@@ -29,9 +33,13 @@ create table if not exists rate_cards (
   price_currency text not null default 'GHS',
   price_note text not null default '',
   image_path text not null,
+  image_public_id text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table photos add column if not exists image_public_id text;
+alter table rate_cards add column if not exists image_public_id text;
 
 -- A single marker row means "the one admin account has been created" — it's
 -- what lets /admin/setup-account refuse to create a second account once
@@ -96,11 +104,13 @@ insert into categories (key, label, sort_order) values
   ('editorial', 'Editorial', 3),
   ('film', 'Film', 4),
   ('baby-family', 'Baby & Family', 5),
-  ('wedding', 'Weddings', 6)
+  ('wedding', 'Weddings', 6),
+  ('corporate', 'Corporate', 7)
 on conflict (key) do nothing;
 
--- Storage: create a public bucket named "photos" (used for both gallery
--- photos and rate card images) and its access policies.
+-- Storage: create a public bucket named "photos". No longer used for new
+-- uploads (images now go to Cloudinary — see src/lib/cloudinary.ts) but
+-- left in place harmlessly in case anything still references it.
 
 insert into storage.buckets (id, name, public)
 values ('photos', 'photos', true)
