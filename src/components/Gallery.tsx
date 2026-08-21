@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import type { CategoryOption, GalleryPhoto } from "@/lib/data";
+import { groupPhotosForDisplay } from "@/lib/groupPhotos";
 import Lightbox from "@/components/Lightbox";
 import GalleryCard from "@/components/GalleryCard";
 import MaskReveal from "@/components/MaskReveal";
@@ -25,6 +26,8 @@ export default function Gallery({
     () => (active === "all" ? photos : photos.filter((p) => p.category === active)),
     [active, photos]
   );
+
+  const cells = useMemo(() => groupPhotosForDisplay(filtered), [filtered]);
 
   return (
     <section id="work" className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
@@ -72,15 +75,19 @@ export default function Gallery({
       ) : (
         <div className="grid auto-rows-[240px] grid-cols-2 gap-3 md:auto-rows-[280px] md:grid-cols-4 md:gap-4">
           <AnimatePresence mode="popLayout">
-            {filtered.map((photo, i) => (
-              <GalleryCard
-                key={photo.id}
-                photo={photo}
-                index={i}
-                onClick={() => setOpenIndex(i)}
-                className={`col-span-2 md:col-span-1 ${photo.span}`}
-              />
-            ))}
+            {cells.map((cell) => {
+              const cover = cell.kind === "group" ? cell.photos[0] : cell.photo;
+              return (
+                <GalleryCard
+                  key={cell.kind === "group" ? cell.project : cover.id}
+                  photo={cover}
+                  index={cell.index}
+                  onClick={() => setOpenIndex(cell.index)}
+                  groupCount={cell.kind === "group" ? cell.photos.length : undefined}
+                  className={`col-span-2 md:col-span-1 ${cover.span}`}
+                />
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

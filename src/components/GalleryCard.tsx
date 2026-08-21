@@ -10,12 +10,17 @@ export default function GalleryCard({
   index,
   onClick,
   className,
+  groupCount,
 }: {
   photo: GalleryPhoto;
   index: number;
   onClick: () => void;
   className: string;
+  /** When set, this tile is a group cover — shows a "N photos" badge and
+   * uses the group's own name instead of this cover photo's title. */
+  groupCount?: number;
 }) {
+  const title = groupCount ? photo.project : photo.title;
   const ref = useRef<HTMLButtonElement>(null);
 
   const rawX = useMotionValue(0);
@@ -59,16 +64,27 @@ export default function GalleryCard({
     >
       <Image
         src={photo.src}
-        alt={`${photo.title}, ${photo.location}`}
+        alt={`${title}, ${photo.location}`}
         fill
         sizes="(min-width: 768px) 25vw, 50vw"
         className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.08]"
       />
+      {groupCount && groupCount > 1 && (
+        <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-bg/70 px-2.5 py-1 font-sans text-[11px] uppercase tracking-[0.1em] text-fg backdrop-blur-sm">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="7" width="14" height="14" rx="2" fill="currentColor" opacity="0.5" />
+            <rect x="7" y="3" width="14" height="14" rx="2" fill="currentColor" />
+          </svg>
+          {groupCount}
+        </span>
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-bg/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100" />
       <div className="absolute inset-x-0 bottom-0 translate-y-2 p-4 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
-        <p className="font-display text-lg font-bold uppercase">{photo.title}</p>
+        <p className="font-display text-lg font-bold uppercase">{title}</p>
         <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
-          {photo.location} — {photo.year}
+          {groupCount && groupCount > 1
+            ? `${groupCount} photos`
+            : `${photo.location} — ${photo.year}`}
         </p>
       </div>
     </motion.button>

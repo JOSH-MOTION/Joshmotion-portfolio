@@ -18,6 +18,9 @@ export type GalleryPhoto = {
   location: string;
   year: string;
   span: string;
+  /** Optional shoot/album name — photos sharing the same project display
+   * grouped together on /work instead of as separate tiles. */
+  project: string;
 };
 
 export type CategoryOption = { key: string; label: string };
@@ -46,6 +49,7 @@ function fallbackPhotos(): GalleryPhoto[] {
     location: p.location,
     year: p.year,
     span: p.span,
+    project: p.project ?? "",
   }));
 }
 
@@ -74,6 +78,7 @@ export async function getPhotos(): Promise<GalleryPhoto[]> {
     location: row.location,
     year: row.year,
     span: row.span ?? "",
+    project: row.project ?? "",
   }));
 }
 

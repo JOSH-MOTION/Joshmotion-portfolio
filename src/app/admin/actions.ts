@@ -141,6 +141,7 @@ export async function createPhotos(_prev: ActionState, formData: FormData): Prom
   const location = String(formData.get("location") ?? "").trim();
   const year = String(formData.get("year") ?? "").trim();
   const span = String(formData.get("span") ?? "");
+  const projectInput = String(formData.get("project") ?? "").trim();
 
   if (!titleBase || !category) return { error: "Title and category are required." };
 
@@ -154,6 +155,10 @@ export async function createPhotos(_prev: ActionState, formData: FormData): Prom
     return { error: "Choose at least one image to upload." };
   }
 
+  // No explicit project name, but several photos at once: group them under
+  // the title automatically (matches what a multi-upload usually means).
+  const project = projectInput || (images.length > 1 ? titleBase : "");
+
   const { count } = await supabase
     .from("photos")
     .select("id", { count: "exact", head: true });
@@ -165,6 +170,7 @@ export async function createPhotos(_prev: ActionState, formData: FormData): Prom
     location,
     year,
     span,
+    project,
     width: img.width,
     height: img.height,
     image_path: img.url,
@@ -192,10 +198,23 @@ export async function updatePhoto(
   const location = String(formData.get("location") ?? "").trim();
   const year = String(formData.get("year") ?? "").trim();
   const span = String(formData.get("span") ?? "");
+  const projectInput = String(formData.get("project") ?? "").trim();
 
   if (!title || !category) return { error: "Title and category are required." };
 
-  const update: Record<string, unknown> = { title, category, location, year, span };
+  // Any files beyond the one replacing this photo become new photos
+  // alongside it, sharing this row's category/location/year/span — parsed
+  // up front so the edited photo and its new siblings share one project.
+  let extras: UploadedImage[] = [];
+  try {
+    extras = JSON.parse(String(formData.get("photosJson") ?? "[]"));
+  } catch {
+    extras = [];
+  }
+  const hasExtras = Array.isArray(extras) && extras.length > 0;
+  const project = projectInput || (hasExtras ? title : "");
+
+  const update: Record<string, unknown> = { title, category, location, year, span, project };
 
   const imageUrl = String(formData.get("imageUrl") ?? "");
   if (imageUrl) {
@@ -208,15 +227,7 @@ export async function updatePhoto(
   const { error } = await supabase.from("photos").update(update).eq("id", id);
   if (error) return { error: error.message };
 
-  // Any files beyond the one replacing this photo become new photos
-  // alongside it, sharing this row's category/location/year/span.
-  let extras: UploadedImage[] = [];
-  try {
-    extras = JSON.parse(String(formData.get("photosJson") ?? "[]"));
-  } catch {
-    extras = [];
-  }
-  if (Array.isArray(extras) && extras.length > 0) {
+  if (hasExtras) {
     const { count } = await supabase
       .from("photos")
       .select("id", { count: "exact", head: true });
@@ -228,6 +239,7 @@ export async function updatePhoto(
       location,
       year,
       span,
+      project,
       width: img.width,
       height: img.height,
       image_path: img.url,

@@ -31,6 +31,7 @@ export default async function EditPhotoPage({
           location: photo.location,
           year: photo.year,
           span: photo.span,
+          project: photo.project,
         }}
         submitLabel="Save changes"
       />

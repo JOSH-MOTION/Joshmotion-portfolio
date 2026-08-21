@@ -58,6 +58,17 @@ sweet spot — a lead shot plus supporting frames that vary in composition.
 For the whole site, 20–30 curated images across your categories reads as a
 full archive without diluting quality.
 
+**Grouping a shoot into one album:** give photos a "Project" name in
+`/admin` (e.g. "Mother's Love") and every photo sharing that name displays
+as one tile on `/work` — a cover image with a photo-count badge — instead
+of cluttering the grid as separate tiles. Clicking it opens the lightbox
+straight into that shoot; arrowing past the last photo continues into
+whatever comes next in the grid, same as browsing normally. Uploading
+several photos at once in `/admin` auto-groups them under the title you
+typed, so you usually don't need to fill in "Project" separately — it's
+there for grouping photos added at different times, or naming the group
+something shorter than the title.
+
 ## Site structure
 
 - `/` — hero, a random one-photo-per-category teaser (re-shuffled on every

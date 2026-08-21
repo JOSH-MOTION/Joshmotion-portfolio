@@ -27,6 +27,7 @@ export default function PhotoForm({
     location: string;
     year: string;
     span: string;
+    project?: string;
   };
   currentImageUrl?: string;
   submitLabel: string;
@@ -141,6 +142,23 @@ export default function PhotoForm({
           defaultValue={initial?.title}
           className="w-full rounded-md border border-line bg-transparent px-3 py-2.5 font-sans text-sm outline-none transition-colors focus:border-accent"
         />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
+          Project (optional)
+        </label>
+        <input
+          name="project"
+          type="text"
+          defaultValue={initial?.project}
+          placeholder="e.g. Mother's Love"
+          className="w-full rounded-md border border-line bg-transparent px-3 py-2.5 font-sans text-sm outline-none transition-colors focus:border-accent"
+        />
+        <p className="mt-1.5 font-sans text-[12px] text-muted">
+          Give a shoot a name and every photo that shares it groups together
+          as one tile on /work — leave empty for a standalone photo.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

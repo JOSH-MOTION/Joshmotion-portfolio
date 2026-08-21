@@ -9,7 +9,9 @@ create table if not exists categories (
 
 -- image_path stores the full Cloudinary secure_url (not a Supabase Storage
 -- object path); image_public_id is Cloudinary's asset id, needed to delete
--- the image from Cloudinary when the row is deleted.
+-- the image from Cloudinary when the row is deleted. project is an optional
+-- shoot/album name — photos sharing the same project are displayed grouped
+-- together on /work instead of as separate tiles (e.g. "Mother's Love").
 create table if not exists photos (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -21,9 +23,12 @@ create table if not exists photos (
   width int not null default 1200,
   height int not null default 1500,
   span text not null default '',
+  project text not null default '',
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table photos add column if not exists project text not null default '';
 
 create table if not exists rate_cards (
   id uuid primary key default gen_random_uuid(),

@@ -18,6 +18,8 @@ export type Photo = {
   year: string;
   /** Tailwind grid placement for the editorial grid */
   span: string;
+  /** Optional shoot/album name — photos sharing one display grouped on /work. */
+  project?: string;
 };
 
 const picsum = (seed: string, w: number, h: number) =>
