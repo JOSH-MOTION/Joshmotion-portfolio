@@ -62,8 +62,8 @@ export default function Nav() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${
-          scrolled ? "bg-bg/80 backdrop-blur-md border-b border-line" : ""
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+          scrolled || open ? "bg-bg/80 backdrop-blur-md border-b border-line" : ""
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-10">
@@ -75,6 +75,7 @@ export default function Nav() {
             <Link
               href="/"
               data-cursor="Home"
+              onClick={() => setOpen(false)}
               className="flex items-center gap-2 font-display text-lg font-bold uppercase tracking-tight"
             >
               <Image
@@ -153,7 +154,7 @@ export default function Nav() {
             animate={{ clipPath: "inset(0 0 0% 0)" }}
             exit={{ clipPath: "inset(0 0 100% 0)" }}
             transition={{ duration: 0.45, ease: [0.77, 0, 0.175, 1] }}
-            className="fixed inset-0 z-40 flex flex-col justify-center bg-bg px-8 md:hidden"
+            className="fixed inset-0 z-30 flex flex-col justify-center bg-bg px-8 pt-20 md:hidden"
           >
             <nav className="flex flex-col gap-2">
               {links.map((l, i) => (
