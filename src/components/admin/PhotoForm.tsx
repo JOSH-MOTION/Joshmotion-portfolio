@@ -50,43 +50,38 @@ export default function PhotoForm({
       .filter((f): f is File => f instanceof File && f.size > 0);
     formData.delete("image");
 
-    if (isEdit) {
-      // Editing replaces the one existing image, if a new file was chosen.
-      if (files[0]) {
-        setUploading(true);
-        try {
-          const result = await uploadToCloudinary(files[0]);
-          formData.set("imageUrl", result.url);
-          formData.set("imagePublicId", result.publicId);
-          formData.set("imageWidth", String(result.width));
-          formData.set("imageHeight", String(result.height));
-        } catch (err) {
-          setUploading(false);
-          setUploadError(err instanceof Error ? err.message : "Upload failed.");
-          return;
-        }
-        setUploading(false);
-      }
-    } else {
-      // Creating: upload every selected file, one photo row per image.
-      if (files.length === 0) {
-        setUploadError("Choose at least one image to upload.");
-        return;
-      }
+    if (!isEdit && files.length === 0) {
+      setUploadError("Choose at least one image to upload.");
+      return;
+    }
+
+    if (files.length > 0) {
       setUploading(true);
       try {
         const results = await Promise.all(files.map(uploadToCloudinary));
-        formData.set(
-          "photosJson",
-          JSON.stringify(
-            results.map((r) => ({
-              url: r.url,
-              publicId: r.publicId,
-              width: r.width,
-              height: r.height,
-            }))
-          )
-        );
+        const toPayload = (r: (typeof results)[number]) => ({
+          url: r.url,
+          publicId: r.publicId,
+          width: r.width,
+          height: r.height,
+        });
+
+        if (isEdit) {
+          // The first file replaces this photo's own image; any further
+          // files become new photos alongside it (same category/location/
+          // year, numbered off this photo's title).
+          const [first, ...rest] = results;
+          formData.set("imageUrl", first.url);
+          formData.set("imagePublicId", first.publicId);
+          formData.set("imageWidth", String(first.width));
+          formData.set("imageHeight", String(first.height));
+          if (rest.length > 0) {
+            formData.set("photosJson", JSON.stringify(rest.map(toPayload)));
+          }
+        } else {
+          // Creating: every file becomes its own new photo.
+          formData.set("photosJson", JSON.stringify(results.map(toPayload)));
+        }
       } catch (err) {
         setUploading(false);
         setUploadError(err instanceof Error ? err.message : "Upload failed.");
@@ -117,22 +112,27 @@ export default function PhotoForm({
           name="image"
           type="file"
           accept="image/*"
-          multiple={!isEdit}
+          multiple
           required={!currentImageUrl}
           onChange={(e) => setSelectedCount(e.target.files?.length ?? 0)}
           className="w-full font-sans text-sm text-muted file:mr-4 file:rounded-full file:border file:border-line file:bg-transparent file:px-3 file:py-1.5 file:font-sans file:text-[12px] file:uppercase file:tracking-[0.1em] file:text-fg"
         />
-        {!isEdit && selectedCount > 1 && (
+        {selectedCount > 1 && (
           <p className="mt-1.5 font-sans text-[12px] text-muted">
-            {selectedCount} images selected — each will be published as its
-            own photo.
+            {isEdit
+              ? `${selectedCount} images selected — the first replaces this photo, the other ${selectedCount - 1} publish as new photos alongside it.`
+              : `${selectedCount} images selected — each will be published as its own photo.`}
           </p>
         )}
       </div>
 
       <div>
         <label className="mb-1.5 block font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
-          Title {!isEdit && selectedCount > 1 && "(used as a base — “Title 1”, “Title 2”, …)"}
+          Title{" "}
+          {selectedCount > 1 &&
+            (isEdit
+              ? "(extra images are numbered off this — “Title 2”, “Title 3”, …)"
+              : "(used as a base — “Title 1”, “Title 2”, …)")}
         </label>
         <input
           name="title"

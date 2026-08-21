@@ -208,6 +208,37 @@ export async function updatePhoto(
   const { error } = await supabase.from("photos").update(update).eq("id", id);
   if (error) return { error: error.message };
 
+  // Any files beyond the one replacing this photo become new photos
+  // alongside it, sharing this row's category/location/year/span.
+  let extras: UploadedImage[] = [];
+  try {
+    extras = JSON.parse(String(formData.get("photosJson") ?? "[]"));
+  } catch {
+    extras = [];
+  }
+  if (Array.isArray(extras) && extras.length > 0) {
+    const { count } = await supabase
+      .from("photos")
+      .select("id", { count: "exact", head: true });
+    const startOrder = count ?? 0;
+
+    const rows = extras.map((img, i) => ({
+      title: `${title} ${i + 2}`,
+      category,
+      location,
+      year,
+      span,
+      width: img.width,
+      height: img.height,
+      image_path: img.url,
+      image_public_id: img.publicId,
+      sort_order: startOrder + i,
+    }));
+
+    const { error: extraError } = await supabase.from("photos").insert(rows);
+    if (extraError) return { error: extraError.message };
+  }
+
   revalidatePath("/");
   revalidatePath("/admin");
   redirect("/admin");
