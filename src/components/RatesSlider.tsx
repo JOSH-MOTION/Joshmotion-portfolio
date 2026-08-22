@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import type { RateCardItem } from "@/lib/data";
@@ -32,6 +33,8 @@ export default function RatesSlider({ cards }: { cards: RateCardItem[] }) {
     setActive(Math.max(0, Math.min(cards.length - 1, i)));
   };
 
+  const hasMore = active < cards.length - 1;
+
   return (
     <div>
       <div
@@ -56,10 +59,21 @@ export default function RatesSlider({ cards }: { cards: RateCardItem[] }) {
             </div>
 
             <div className="flex flex-col justify-center py-10 md:py-0">
-              <p className="mb-3 font-sans text-[13px] uppercase tracking-[0.25em] text-muted">
-                {String(cards.indexOf(card) + 1).padStart(2, "0")} /{" "}
-                {String(cards.length).padStart(2, "0")}
-              </p>
+              <div className="mb-3 flex items-center gap-3">
+                <p className="font-sans text-[13px] uppercase tracking-[0.25em] text-muted">
+                  {String(cards.indexOf(card) + 1).padStart(2, "0")} /{" "}
+                  {String(cards.length).padStart(2, "0")}
+                </p>
+                {cards.indexOf(card) === 0 && cards.length > 1 && (
+                  <motion.p
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                    className="font-sans text-[13px] uppercase tracking-[0.25em] text-accent"
+                  >
+                    swipe for more →
+                  </motion.p>
+                )}
+              </div>
               <h3 className="font-display text-4xl font-extrabold uppercase leading-[0.95] md:text-5xl">
                 {card.title}
               </h3>
@@ -129,13 +143,22 @@ export default function RatesSlider({ cards }: { cards: RateCardItem[] }) {
           >
             ←
           </button>
-          <button
+          <motion.button
             onClick={() => scrollToIndex(active + 1)}
             aria-label="Next"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9]"
+            animate={hasMore ? { x: [0, 4, 0] } : {}}
+            transition={{ duration: 1.3, repeat: hasMore ? Infinity : 0, ease: "easeInOut" }}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9]"
           >
             →
-          </button>
+            {hasMore && (
+              <motion.span
+                animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                className="absolute inset-0 rounded-full border border-accent"
+              />
+            )}
+          </motion.button>
         </div>
       </div>
     </div>

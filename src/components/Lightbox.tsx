@@ -104,39 +104,46 @@ export default function Lightbox({
             animate="center"
             exit="exit"
             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-            className="relative mx-auto h-full max-w-5xl"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.6}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -60 || info.velocity.x < -400) go(1);
+              else if (info.offset.x > 60 || info.velocity.x > 400) go(-1);
+            }}
+            className="relative mx-auto h-full max-w-5xl touch-pan-y"
           >
             <Image
               src={photo.src}
               alt={`${photo.title}, ${photo.location}`}
               fill
               sizes="90vw"
-              className="object-contain"
+              className="pointer-events-none object-contain"
               priority
             />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center justify-between px-6 py-6 md:px-10">
-        <div>
-          <p className="font-display text-xl font-bold uppercase">{photo.title}</p>
+      <div className="flex items-center justify-between gap-4 px-6 py-6 md:px-10">
+        <div className="min-w-0">
+          <p className="truncate font-display text-xl font-bold uppercase">{photo.title}</p>
           <p className="font-sans text-[11px] uppercase tracking-[0.15em] text-muted">
             {photo.location} — {photo.year}
           </p>
         </div>
-        <div className="hidden gap-3 md:flex">
+        <div className="flex shrink-0 gap-3">
           <button
             onClick={() => go(-1)}
             aria-label="Previous"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9] md:h-9 md:w-9"
           >
             ←
           </button>
           <button
             onClick={() => go(1)}
             aria-label="Next"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-line transition-transform duration-[160ms] ease-out hover:border-accent active:scale-[0.9] md:h-9 md:w-9"
           >
             →
           </button>
